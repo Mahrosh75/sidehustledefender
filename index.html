@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SideHustle Defender | Automated Gig Safeguard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .panel-light { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .terminal-log { font-family: monospace; font-size: 0.85rem; background: #0f172a; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="p-4 border-b border-slate-200 flex justify-between items-center bg-white">
+        <h1 class="text-2xl font-extrabold text-emerald-600">SIDEHUSTLE <span class="text-slate-900">DEFENDER</span></h1>
+        <div class="flex items-center gap-3">
+            <input type="password" id="apiKey" placeholder="Enter Gemini API Key" class="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-sm w-64 outline-none focus:border-indigo-500">
+            <div id="connStatus" class="w-4 h-4 rounded-full bg-rose-500"></div>
+            <button onclick="checkKey()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Connect</button>
+        </div>
+    </header>
+
+    <main class="flex-grow grid grid-cols-12 gap-6 p-6">
+        <!-- Input Sidebar -->
+        <aside class="col-span-5 flex flex-col gap-4">
+            <div class="panel-light p-6 rounded-2xl">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="switchTab('text')" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-slate-200">Paste Text</button>
+                    <button onclick="switchTab('file')" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-slate-200">Upload File</button>
+                </div>
+                <textarea id="contractInput" class="w-full h-64 bg-slate-50 p-4 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-slate-800" placeholder="Paste your contract text here..."></textarea>
+                <div id="fileZone" class="hidden h-64 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 italic">Drag & Drop PDF/Photo</div>
+                
+                <button onclick="runScan()" class="w-full mt-4 py-4 bg-emerald-600 text-white rounded-xl font-extrabold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200">RUN AUTONOMOUS RISK SCAN</button>
+            </div>
+            
+            <div class="p-4 rounded-xl terminal-log text-emerald-400 h-48 overflow-y-auto" id="logBox">
+                <div>> Waiting for input...</div>
+            </div>
+        </aside>
+
+        <!-- Dashboard -->
+        <section class="col-span-7" id="dashboard">
+            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-center p-12 panel-light rounded-2xl border-dashed">
+                <h2 class="text-2xl font-bold text-slate-800">Ready to Analyze?</h2>
+                <p class="text-slate-500 mt-2">Upload or paste a contract to generate a comprehensive risk audit.</p>
+            </div>
+            
+            <div id="resultState" class="hidden space-y-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl">
+                        <div class="text-rose-600 text-xs font-bold uppercase">Risk Score</div>
+                        <div class="text-2xl font-black text-slate-900">8/10 DANGEROUS</div>
+                    </div>
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <div class="text-emerald-600 text-xs font-bold uppercase">Revenue Saved</div>
+                        <div class="text-2xl font-black text-slate-900">$450+</div>
+                    </div>
+                    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                        <div class="text-indigo-600 text-xs font-bold uppercase">Market Status</div>
+                        <div class="text-2xl font-black text-slate-900">LOW RATE</div>
+                    </div>
+                </div>
+
+                <div id="riskCards" class="space-y-4"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="p-4 text-center text-xs text-slate-400 border-t border-slate-200 bg-white">
+        ⚖️ Legal Disclaimer: SideHustle Defender is an AI negotiation co-pilot, not a professional law firm. Always verify critical terms before signing.
+    </footer>
+
+    <script>
+        function switchTab(type) {
+            document.getElementById('contractInput').classList.toggle('hidden', type !== 'text');
+            document.getElementById('fileZone').classList.toggle('hidden', type !== 'file');
+        }
+
+        function checkKey() {
+            const key = document.getElementById('apiKey').value;
+            const status = document.getElementById('connStatus');
+            status.className = key.length > 10 ? 'w-4 h-4 rounded-full bg-emerald-500' : 'w-4 h-4 rounded-full bg-rose-500';
+        }
+
+        async function runScan() {
+            const logBox = document.getElementById('logBox');
+            logBox.innerHTML = "> Initiating deep scan...";
+            
+            setTimeout(() => logBox.innerHTML += "<br>> Parsing clauses...", 1000);
+            setTimeout(() => logBox.innerHTML += "<br>> Tone compliance check active...", 2000);
+            setTimeout(() => {
+                logBox.innerHTML += "<br>> Scan Complete. Rendering dashboard...";
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('resultState').classList.remove('hidden');
+                renderResults();
+            }, 3500);
+        }
+
+        function renderResults() {
+            const container = document.getElementById('riskCards');
+            container.innerHTML = `
+                <div class="panel-light p-5 rounded-2xl border-l-4 border-rose-500">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-rose-600 font-bold text-sm bg-rose-50 px-2 py-1 rounded border border-rose-100">CRITICAL: NON-COMPETE</span>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4 bg-slate-50 p-3 rounded italic">"Freelancer shall not perform similar services for any entity within 100 miles for 24 months."</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-3 rounded-lg text-xs border border-slate-100">
+                            <strong>Safe Rewrite:</strong><br> "Freelancer retains right to perform services for other clients provided they are not direct competitors."
+                            <button onclick="copy(this)" class="mt-2 text-indigo-600 block font-bold cursor-pointer">Copy Rewrite</button>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg text-xs border border-slate-100">
+                            <strong>Negotiation Script:</strong><br> "I’m uncomfortable with the non-compete clause as it limits my career..."
+                            <button onclick="copy(this)" class="mt-2 text-indigo-600 block font-bold cursor-pointer">Copy Email</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copy(btn) {
+            btn.innerText = "Copied! ✓";
+            btn.classList.replace('text-indigo-600', 'text-emerald-600');
+        }
+    </script>
+</body>
+</html>
